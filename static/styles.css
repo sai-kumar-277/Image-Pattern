@@ -1,0 +1,266 @@
+:root {
+    --bg-color: #0b0c10;
+    --card-bg: rgba(31, 40, 51, 0.6);
+    --primary: #66fcf1;
+    --secondary: #45a29e;
+    --text-main: #ffffff;
+    --text-muted: #c5c6c7;
+    --glass-border: rgba(102, 252, 241, 0.2);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Outfit', sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* Geometric Background */
+.background-pattern {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: -1;
+    background-image: 
+        linear-gradient(30deg, rgba(69, 162, 158, 0.05) 12%, transparent 12.5%, transparent 87%, rgba(69, 162, 158, 0.05) 87.5%, rgba(69, 162, 158, 0.05)),
+        linear-gradient(150deg, rgba(69, 162, 158, 0.05) 12%, transparent 12.5%, transparent 87%, rgba(69, 162, 158, 0.05) 87.5%, rgba(69, 162, 158, 0.05)),
+        linear-gradient(30deg, rgba(69, 162, 158, 0.05) 12%, transparent 12.5%, transparent 87%, rgba(69, 162, 158, 0.05) 87.5%, rgba(69, 162, 158, 0.05)),
+        linear-gradient(150deg, rgba(69, 162, 158, 0.05) 12%, transparent 12.5%, transparent 87%, rgba(69, 162, 158, 0.05) 87.5%, rgba(69, 162, 158, 0.05)),
+        linear-gradient(60deg, rgba(102, 252, 241, 0.05) 25%, transparent 25.5%, transparent 75%, rgba(102, 252, 241, 0.05) 75%, rgba(102, 252, 241, 0.05)),
+        linear-gradient(60deg, rgba(102, 252, 241, 0.05) 25%, transparent 25.5%, transparent 75%, rgba(102, 252, 241, 0.05) 75%, rgba(102, 252, 241, 0.05));
+    background-size: 80px 140px;
+    background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;
+    animation: drift 60s linear infinite;
+}
+
+@keyframes drift {
+    0% { background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px; }
+    100% { background-position: 80px 140px, 80px 140px, 120px 210px, 120px 210px, 80px 140px, 120px 210px; }
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 3rem;
+    animation: fadeInDown 1s ease-out;
+}
+
+header h1 {
+    font-size: 4rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 0.5rem;
+}
+
+.highlight {
+    color: var(--primary);
+    text-shadow: 0 0 20px rgba(102, 252, 241, 0.5);
+}
+
+header p {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Glassmorphism */
+.glass-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    padding: 2rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(102, 252, 241, 0.15);
+}
+
+.upload-section {
+    max-width: 800px;
+    margin: 0 auto 3rem auto;
+}
+
+.drop-zone {
+    border: 2px dashed var(--secondary);
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    background: rgba(0,0,0,0.2);
+    margin-bottom: 2rem;
+}
+
+.drop-zone.dragover {
+    border-color: var(--primary);
+    background: rgba(102, 252, 241, 0.1);
+    transform: scale(1.02);
+}
+
+.drop-icon {
+    font-size: 3rem;
+    color: var(--primary);
+    display: block;
+    margin-bottom: 1rem;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.drop-zone p { margin-bottom: 1rem; font-size: 1.2rem; }
+.or { display: block; color: var(--text-muted); margin-bottom: 1rem; }
+
+.settings {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.input-group label { color: var(--text-muted); font-size: 0.9rem; }
+.input-group input {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--secondary);
+    color: white;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    width: 150px;
+}
+.input-group input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 10px rgba(102,252,241,0.3);
+}
+
+.btn {
+    padding: 0.8rem 2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.primary-btn {
+    background: linear-gradient(135deg, var(--secondary), var(--primary));
+    color: #0b0c10;
+    box-shadow: 0 4px 15px rgba(102, 252, 241, 0.3);
+}
+
+.primary-btn:hover {
+    box-shadow: 0 6px 20px rgba(102, 252, 241, 0.5);
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+}
+
+.btn[for="file-input"] {
+    background: transparent;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+}
+.btn[for="file-input"]:hover {
+    background: rgba(102,252,241,0.1);
+}
+
+/* Loader */
+.loader-container {
+    text-align: center;
+    margin-top: 2rem;
+}
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(102,252,241,0.2);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem auto;
+}
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+.hidden { display: none !important; }
+
+/* Results */
+.results-section h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+}
+
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.result-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.result-card h3 {
+    color: var(--text-main);
+    font-size: 1.2rem;
+    font-weight: 400;
+}
+
+.result-card img {
+    max-width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    background: #1a1a2e; /* dark bg for transparent images */
+}
+
+.full-width {
+    width: 100%;
+}
+.full-width img {
+    max-height: 600px;
+    object-fit: contain;
+}
+
+.actions {
+    margin-top: 1.5rem;
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
