@@ -2,6 +2,8 @@
 
 A modern web application that seamlessly reconstructs infinite geometric textures from a single image using lattice detection.
 
+Link : https://huggingface.co/spaces/saikumar277/pattern
+
 ## Features
 - **Geometric Pattern Recognition**: Analyzes an uploaded image to find repeating structural patterns.
 - **Autocorrelation Analysis**: Computes the autocorrelation map and extracts the base unit tile.
