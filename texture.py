@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Agg')
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -119,28 +121,28 @@ def get_autocorr_b64(acorr, v1, v2):
     ac = acorr[cy-crop:cy+crop, cx-crop:cx+crop]
 
     # Use dark background for plot
-    plt.style.use('dark_background')
-    fig, ax = plt.subplots(figsize=(6, 6), facecolor='#1a1a2e')
-    ax.imshow(ac, cmap='inferno', vmin=0, vmax=0.7)
+    with plt.style.context('dark_background'):
+        fig, ax = plt.subplots(figsize=(6, 6), facecolor='#1a1a2e')
+        ax.imshow(ac, cmap='inferno', vmin=0, vmax=0.7)
 
-    def in_bounds(dx, dy):
-        return abs(dx) < crop and abs(dy) < crop
+        def in_bounds(dx, dy):
+            return abs(dx) < crop and abs(dy) < crop
 
-    ax.plot(crop, crop, 'c+', markersize=14, markeredgewidth=2, label='Zero lag')
+        ax.plot(crop, crop, 'c+', markersize=14, markeredgewidth=2, label='Zero lag')
 
-    if in_bounds(v1[0], v1[1]):
-        ax.plot(crop+v1[0], crop+v1[1], 'lime', marker='+',
-                markersize=14, markeredgewidth=2, label=f'v1 ({v1[0]:.0f},{v1[1]:.0f})')
-    if in_bounds(v2[0], v2[1]):
-        ax.plot(crop+v2[0], crop+v2[1], 'r+',
-                markersize=14, markeredgewidth=2, label=f'v2 ({v2[0]:.0f},{v2[1]:.0f})')
+        if in_bounds(v1[0], v1[1]):
+            ax.plot(crop+v1[0], crop+v1[1], 'lime', marker='+',
+                    markersize=14, markeredgewidth=2, label=f'v1 ({v1[0]:.0f},{v1[1]:.0f})')
+        if in_bounds(v2[0], v2[1]):
+            ax.plot(crop+v2[0], crop+v2[1], 'r+',
+                    markersize=14, markeredgewidth=2, label=f'v2 ({v2[0]:.0f},{v2[1]:.0f})')
 
-    ax.legend(fontsize=9, facecolor='#1a1a2e', edgecolor='white')
-    ax.set_title(f"Autocorrelation map (crop={crop}px)", fontsize=11, color='white')
-    ax.axis('off')
-    plt.tight_layout()
-    b64 = fig_to_base64(fig)
-    plt.close(fig)
+        ax.legend(fontsize=9, facecolor='#1a1a2e', edgecolor='white')
+        ax.set_title(f"Autocorrelation map (crop={crop}px)", fontsize=11, color='white')
+        ax.axis('off')
+        plt.tight_layout()
+        b64 = fig_to_base64(fig)
+        plt.close(fig)
     return "data:image/png;base64," + b64
 
 def process_texture(img, out_w, out_h):

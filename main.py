@@ -6,6 +6,7 @@ import os
 from PIL import Image
 import numpy as np
 import texture
+import asyncio
 
 app = FastAPI()
 
@@ -17,13 +18,22 @@ async def read_index():
         return f.read()
 
 @app.post("/process")
-async def process_image(file: UploadFile = File(...), out_w: int = Form(1920), out_h: int = Form(1080)):
+async def process_image(
+    file: UploadFile = File(...), 
+    out_w: int = Form(1920, le=3840), 
+    out_h: int = Form(1080, le=2160)
+):
     contents = await file.read()
-    img = Image.open(io.BytesIO(contents)).convert("RGB")
-    img_arr = np.array(img, dtype=np.float64) / 255.0
     
+    def _process():
+        img = Image.open(io.BytesIO(contents)).convert("RGB")
+        # Prevent OOM by scaling down extremely large input images
+        img.thumbnail((2048, 2048), Image.Resampling.LANCZOS)
+        img_arr = np.array(img, dtype=np.float64) / 255.0
+        return texture.process_texture(img_arr, out_w, out_h)
+
     try:
-        results = texture.process_texture(img_arr, out_w, out_h)
+        results = await asyncio.to_thread(_process)
         return {"status": "success", "data": results}
     except Exception as e:
         import traceback
