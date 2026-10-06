@@ -27,9 +27,9 @@ async def process_image(
     
     def _process():
         img = Image.open(io.BytesIO(contents)).convert("RGB")
-        # Prevent OOM by scaling down extremely large input images
-        img.thumbnail((2048, 2048), Image.Resampling.LANCZOS)
-        img_arr = np.array(img, dtype=np.float64) / 255.0
+        # Prevent OOM on Render's 512MB free tier by scaling down input images
+        img.thumbnail((512, 512), Image.Resampling.LANCZOS)
+        img_arr = np.array(img, dtype=np.float32) / 255.0
         return texture.process_texture(img_arr, out_w, out_h)
 
     try:

@@ -72,7 +72,7 @@ def extract_tile(img, v1, v2):
                    [v2[0]/th, v1[0]/tw]])
     b  = np.array([cy - 0.5*v2[1] - 0.5*v1[1],
                    cx - 0.5*v2[0] - 0.5*v1[0]])
-    tile = np.zeros((th, tw, 3))
+    tile = np.zeros((th, tw, 3), dtype=np.float32)
     for ch in range(3):
         tile[:,:,ch] = affine_transform(img[:,:,ch], A, offset=b,
                                         output_shape=(th, tw),
@@ -82,12 +82,12 @@ def extract_tile(img, v1, v2):
 
 def reconstruct(tile, v1, v2, out_w, out_h):
     th, tw = tile.shape[:2]
-    M      = np.array([[v1[0], v2[0]], [v1[1], v2[1]]], dtype=float)
+    M      = np.array([[v1[0], v2[0]], [v1[1], v2[1]]], dtype=np.float32)
     M_inv  = np.linalg.inv(M)
 
     rows, cols = np.mgrid[0:out_h, 0:out_w]
-    x = cols.astype(float) - out_w / 2
-    y = rows.astype(float) - out_h / 2
+    x = cols.astype(np.float32) - out_w / 2
+    y = rows.astype(np.float32) - out_h / 2
 
     alpha = (M_inv[0,0]*x + M_inv[0,1]*y) % 1.0
     beta  = (M_inv[1,0]*x + M_inv[1,1]*y) % 1.0
@@ -95,7 +95,7 @@ def reconstruct(tile, v1, v2, out_w, out_h):
     tc = alpha * tw
     tr = beta  * th
 
-    result = np.zeros((out_h, out_w, 3))
+    result = np.zeros((out_h, out_w, 3), dtype=np.float32)
     for ch in range(3):
         result[:,:,ch] = map_coordinates(tile[:,:,ch], [tr, tc],
                                          mode='wrap', order=1)
