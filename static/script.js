@@ -28,27 +28,48 @@ document.addEventListener('DOMContentLoaded', () => {
         let files = dt.files;
         if(files.length > 0) {
             fileInput.files = files;
-            updateDropZoneText(files[0].name);
+            showPreview(files[0]);
         }
     });
 
     fileInput.addEventListener('change', (e) => {
         if(e.target.files.length > 0) {
-            updateDropZoneText(e.target.files[0].name);
+            showPreview(e.target.files[0]);
         }
     });
 
-    function updateDropZoneText(name) {
-        const p = dropZone.querySelector('p');
-        p.textContent = `Selected: ${name}`;
-        p.style.color = 'var(--primary)';
+    function showPreview(file) {
+        // Revoke any previous object URL to free memory
+        const existing = dropZone.querySelector('#drop-preview');
+        if (existing && existing.dataset.url) {
+            URL.revokeObjectURL(existing.dataset.url);
+        }
+
+        const objectUrl = URL.createObjectURL(file);
+
+        dropZone.innerHTML = `
+            <img id="drop-preview" src="${objectUrl}" data-url="${objectUrl}"
+                 alt="Preview" style="
+                     max-width: 100%; max-height: 220px;
+                     border-radius: 10px;
+                     object-fit: contain;
+                     box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+                     margin-bottom: 0.75rem;
+                 ">
+            <p style="color: var(--primary); font-size: 0.95rem; margin-bottom: 0.5rem;">
+                ${file.name}
+            </p>
+            <label for="file-input" class="btn" style="font-size:0.85rem; padding: 0.5rem 1.2rem;">
+                Change Image
+            </label>
+        `;
     }
 
     // Form submission
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         if(fileInput.files.length === 0) {
-            alert('Please select an image file first.');
+            showError('⚠️ Please select an image file first.');
             return;
         }
 
