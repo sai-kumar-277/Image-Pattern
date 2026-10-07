@@ -95,6 +95,35 @@ def extract_tile(img, v1, v2):
     print(f"Extracted tile: {tw}×{th}px")
     return tile
 
+def seam_minimize(tile):
+    """
+    Circularly shift the tile (in both axes) to find the phase where the
+    left↔right and top↔bottom boundaries have the minimum pixel discontinuity.
+    This prevents the 'mid-pattern boundary' artifact when tiling.
+    """
+    th, tw = tile.shape[:2]
+    # Sample candidate shifts on a coarse grid for speed
+    step_y = max(1, th // 20)
+    step_x = max(1, tw // 20)
+
+    best_energy = float('inf')
+    best_dy, best_dx = 0, 0
+
+    for dy in range(0, th, step_y):
+        for dx in range(0, tw, step_x):
+            shifted = np.roll(np.roll(tile, dy, axis=0), dx, axis=1)
+            # Energy = sum of squared pixel differences across both wrap edges
+            h_seam = np.sum((shifted[-1] - shifted[0]) ** 2)
+            v_seam = np.sum((shifted[:, -1] - shifted[:, 0]) ** 2)
+            energy = h_seam + v_seam
+            if energy < best_energy:
+                best_energy = energy
+                best_dy, best_dx = dy, dx
+
+    result = np.roll(np.roll(tile, best_dy, axis=0), best_dx, axis=1)
+    print(f"Seam minimized: shift=({best_dx}, {best_dy}), seam energy={best_energy:.4f}")
+    return result
+
 def reconstruct(tile, v1, v2, out_w, out_h):
     th, tw = tile.shape[:2]
     M      = np.array([[v1[0], v2[0]], [v1[1], v2[1]]], dtype=np.float32)
@@ -165,6 +194,7 @@ def process_texture(img, out_w, out_h):
     v1, v2 = detect_lattice(acorr, img.shape[:2])
     
     tile = extract_tile(img, v1, v2)
+    tile = seam_minimize(tile)          # phase-align tile boundaries
     result = reconstruct(tile, v1, v2, out_w, out_h)
     
     return {
