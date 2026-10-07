@@ -1,19 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    // --- TABS LOGIC ---
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            tabBtns.forEach(b => b.classList.remove('active'));
-            tabContents.forEach(c => c.classList.remove('active'));
-            
-            btn.classList.add('active');
-            document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
-        });
-    });
-
     // --- DESIGN STUDIO LOGIC ---
     const canvas = document.getElementById('design-canvas');
     const ctx = canvas.getContext('2d');
@@ -62,14 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     bgColor.addEventListener('input', () => {
-        // Redraw background without clearing shapes (simplification: clear all for now on bg change, or just fill behind)
-        // Better: we could keep paths, but bitmap canvas is destructive. 
-        // We'll just set it for new clears, or composite behind.
         const temp = ctx.getImageData(0,0, canvas.width, canvas.height);
         ctx.fillStyle = bgColor.value;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        // We need a proper layering system or just accept BG changes wipe/paint over.
-        // For simplicity: redraw history
         redrawHistory();
     });
 
@@ -106,24 +87,37 @@ document.addEventListener('DOMContentLoaded', () => {
         initCanvas();
     });
 
-    // Drawing events
+    // Drawing events - using getBoundingClientRect to map mouse correctly if scaled
+    function getMousePos(evt) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        return {
+            x: (evt.clientX - rect.left) * scaleX,
+            y: (evt.clientY - rect.top) * scaleY
+        };
+    }
+
     canvas.addEventListener('mousedown', (e) => {
         isDrawing = true;
-        startX = e.offsetX;
-        startY = e.offsetY;
+        const pos = getMousePos(e);
+        startX = pos.x;
+        startY = pos.y;
         snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
     });
 
     canvas.addEventListener('mousemove', (e) => {
         if (!isDrawing) return;
         ctx.putImageData(snapshot, 0, 0);
-        drawShape(e.offsetX, e.offsetY);
+        const pos = getMousePos(e);
+        drawShape(pos.x, pos.y);
     });
 
     canvas.addEventListener('mouseup', (e) => {
         if (!isDrawing) return;
         isDrawing = false;
-        drawShape(e.offsetX, e.offsetY);
+        const pos = getMousePos(e);
+        drawShape(pos.x, pos.y);
         saveHistory();
         updatePreview();
     });
@@ -141,6 +135,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.lineWidth = strokeWidth.value;
         ctx.strokeStyle = strokeColor.value;
         ctx.fillStyle = fillColor.value;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
 
         if (currentTool === 'rect') {
             ctx.rect(startX, startY, x - startX, y - startY);
@@ -241,12 +237,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Modals
+    const analyzeModal = document.getElementById('analyze-modal');
+    const resultModal = document.getElementById('result-modal');
+    const btnOpenAnalyze = document.getElementById('btn-open-analyze');
+    
+    document.getElementById('close-analyze-modal').addEventListener('click', () => analyzeModal.classList.add('hidden'));
+    document.getElementById('close-result-modal').addEventListener('click', () => resultModal.classList.add('hidden'));
+    btnOpenAnalyze.addEventListener('click', () => analyzeModal.classList.remove('hidden'));
+
     // Synthesize Design
     const synthesizeBtn = document.getElementById('synthesize-btn');
     const designLoader = document.getElementById('design-loader');
     const designResult = document.getElementById('design-result');
 
     synthesizeBtn.addEventListener('click', async () => {
+        resultModal.classList.remove('hidden');
         designResult.classList.add('hidden');
         designLoader.classList.remove('hidden');
 
@@ -267,9 +273,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('design-res-img').src = result.data.reconstructed;
                     document.getElementById('design-download-btn').href = result.data.reconstructed;
                     designResult.classList.remove('hidden');
-                    designResult.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 } else {
                     alert('Error: ' + result.message);
+                    resultModal.classList.add('hidden');
                 }
                 designLoader.classList.add('hidden');
             }, 'image/png');
@@ -277,6 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(err);
             alert('Failed to synthesize pattern.');
             designLoader.classList.add('hidden');
+            resultModal.classList.add('hidden');
         }
     });
 
@@ -307,16 +314,16 @@ document.addEventListener('DOMContentLoaded', () => {
             let files = e.dataTransfer.files;
             if(files.length > 0) {
                 fileInput.files = files;
-                showPreview(files[0]);
+                showPreviewAnalysis(files[0]);
             }
         });
 
         fileInput.addEventListener('change', (e) => {
-            if(e.target.files.length > 0) showPreview(e.target.files[0]);
+            if(e.target.files.length > 0) showPreviewAnalysis(e.target.files[0]);
         });
     }
 
-    function showPreview(file) {
+    function showPreviewAnalysis(file) {
         const existing = dropZone.querySelector('#drop-preview');
         if (existing && existing.dataset.url) URL.revokeObjectURL(existing.dataset.url);
 
@@ -333,7 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             if(fileInput.files.length === 0) {
-                showError('⚠️ Please select an image file first.');
+                alert('Please select an image file first.');
                 return;
             }
 
@@ -350,13 +357,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await response.json();
 
                 if(result.status === 'success') {
-                    hideError();
-                    displayResults(result.data);
+                    displayResultsAnalysis(result.data);
                 } else {
-                    showError('⚠️ ' + result.message);
+                    alert('Error: ' + result.message);
                 }
             } catch(error) {
-                showError('⚠️ Could not connect to the server. Please try again in a moment.');
+                alert('Could not connect to the server. Please try again in a moment.');
                 console.error(error);
             } finally {
                 loader.classList.add('hidden');
@@ -364,7 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function displayResults(data) {
+    function displayResultsAnalysis(data) {
         document.getElementById('res-original').src = data.original;
         document.getElementById('res-autocorr').src = data.autocorr;
         document.getElementById('res-tile').src = data.tile;
@@ -373,22 +379,5 @@ document.addEventListener('DOMContentLoaded', () => {
         
         resultsSection.classList.remove('hidden');
         resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    function showError(msg) {
-        let banner = document.getElementById('error-banner');
-        if (!banner) {
-            banner = document.createElement('div');
-            banner.id = 'error-banner';
-            banner.style.cssText = `margin-top: 1rem; padding: 1rem 1.5rem; border-radius: 12px; background: rgba(255,80,80,0.15); border: 1px solid rgba(255,80,80,0.4); color: #ff8080; font-size: 0.95rem; text-align: center;`;
-            document.querySelector('.upload-section').appendChild(banner);
-        }
-        banner.textContent = msg;
-        banner.style.display = 'block';
-    }
-
-    function hideError() {
-        const banner = document.getElementById('error-banner');
-        if (banner) banner.style.display = 'none';
     }
 });
