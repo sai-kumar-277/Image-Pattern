@@ -207,3 +207,18 @@ def process_texture(img, out_w, out_h):
             "v2": {"x": v2[0], "y": v2[1]}
         }
     }
+
+def tile_image(img, out_w, out_h):
+    """
+    Simply repeats the provided image (tile) to fill the output dimensions.
+    """
+    th, tw = img.shape[:2]
+    reps_y = int(np.ceil(out_h / th))
+    reps_x = int(np.ceil(out_w / tw))
+    
+    tiled = np.tile(img, (reps_y, reps_x, 1))
+    result = tiled[:out_h, :out_w, :]
+    
+    return {
+        "reconstructed": "data:image/png;base64," + arr_to_base64(result)
+    }

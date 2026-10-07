@@ -40,6 +40,29 @@ async def process_image(
         traceback.print_exc()
         return {"status": "error", "message": str(e)}
 
+@app.post("/synthesize")
+async def synthesize_pattern(
+    file: UploadFile = File(...), 
+    out_w: int = Form(1920, le=3840), 
+    out_h: int = Form(1080, le=2160)
+):
+    contents = await file.read()
+    
+    def _tile():
+        # Open drawn canvas PNG (can have alpha, we blend it over black or keep it)
+        img = Image.open(io.BytesIO(contents)).convert("RGB")
+        img_arr = np.array(img, dtype=np.float32) / 255.0
+        return texture.tile_image(img_arr, out_w, out_h)
+
+    try:
+        results = await asyncio.to_thread(_tile)
+        return {"status": "success", "data": results}
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {"status": "error", "message": str(e)}
+
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))

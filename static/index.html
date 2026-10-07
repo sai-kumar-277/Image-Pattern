@@ -3,29 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geometric Texture Synthesizer</title>
+    <title>Pattern Studio</title>
     <link rel="stylesheet" href="/static/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="background-pattern"></div>
     <div class="container">
+
         <header>
-            <h1>Pattern <span class="highlight">Synth</span></h1>
-            <p>Seamlessly reconstruct infinite geometric textures from a single image using lattice detection.</p>
+            <h1>Pattern <span class="highlight">Studio</span></h1>
+            <p>Design geometric patterns for textiles, tiles, wallpapers, doormats and more.</p>
         </header>
 
-        <main>
+        <nav class="tab-nav">
+            <button class="tab-btn active" data-tab="design">✏️ Design Pattern</button>
+            <button class="tab-btn" data-tab="analyze">🔍 Analyze Image</button>
+        </nav>
+
+        <!-- ===== DESIGN TAB ===== -->
+        <div id="tab-design" class="tab-content active">
+
+            <div class="studio-layout">
+
+                <!-- Toolbar -->
+                <aside class="toolbar glass-card">
+                    <div class="tool-section">
+                        <span class="section-label">Shapes</span>
+                        <div class="tool-grid">
+                            <button class="tool-btn active" data-tool="rect"     title="Rectangle">▭</button>
+                            <button class="tool-btn"        data-tool="circle"   title="Circle / Ellipse">○</button>
+                            <button class="tool-btn"        data-tool="triangle" title="Triangle">△</button>
+                            <button class="tool-btn"        data-tool="diamond"  title="Diamond">◇</button>
+                            <button class="tool-btn"        data-tool="hexagon"  title="Hexagon">⬡</button>
+                            <button class="tool-btn"        data-tool="star"     title="5-Point Star">★</button>
+                            <button class="tool-btn"        data-tool="line"     title="Line">╱</button>
+                        </div>
+                    </div>
+
+                    <div class="tool-section">
+                        <span class="section-label">Style</span>
+                        <div class="prop-row">
+                            <label class="color-label">Fill
+                                <input type="color" id="fill-color" value="#66fcf1">
+                            </label>
+                            <label class="color-label">Stroke
+                                <input type="color" id="stroke-color" value="#0b0c10">
+                            </label>
+                        </div>
+                        <div class="prop-row">
+                            <span class="prop-name">Stroke&nbsp;px</span>
+                            <input type="range" id="stroke-width" min="0" max="20" value="1" class="slider">
+                            <span id="stroke-width-val" class="val-badge">1</span>
+                        </div>
+                        <div class="prop-row">
+                            <label class="toggle-label">
+                                <input type="checkbox" id="filled-toggle" checked>
+                                Fill shape
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="tool-section">
+                        <span class="section-label">Canvas</span>
+                        <div class="prop-row">
+                            <label class="color-label">Background
+                                <input type="color" id="bg-color" value="#0b0c10">
+                            </label>
+                        </div>
+                        <div class="prop-row">
+                            <label class="toggle-label">
+                                <input type="checkbox" id="grid-toggle">
+                                Show grid
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="tool-section">
+                        <span class="section-label">Actions</span>
+                        <button class="tool-action-btn" id="undo-btn">↩ Undo</button>
+                        <button class="tool-action-btn" id="clear-btn">🗑 Clear All</button>
+                    </div>
+                </aside>
+
+                <!-- Drawing Canvas -->
+                <div class="canvas-area">
+                    <div class="canvas-wrapper glass-card">
+                        <div class="canvas-header">
+                            <span>Tile Canvas</span>
+                            <small>click &amp; drag to draw · Ctrl+Z to undo</small>
+                        </div>
+                        <canvas id="design-canvas" width="400" height="400"></canvas>
+                    </div>
+                </div>
+
+                <!-- Live Preview -->
+                <div class="preview-panel glass-card">
+                    <span class="section-label">Live Preview — 3×3 Tile</span>
+                    <canvas id="preview-canvas" width="360" height="360"></canvas>
+                    <p class="preview-hint">This is how your tile will repeat</p>
+                </div>
+
+            </div><!-- /studio-layout -->
+
+            <!-- Output Settings -->
+            <div class="output-section glass-card">
+                <h3>Synthesize <span class="highlight">Output</span></h3>
+                <div class="output-controls">
+                    <div class="presets-wrap">
+                        <span class="section-label">Quick Presets</span>
+                        <div class="presets">
+                            <button class="preset-btn active" data-w="1920" data-h="1080">🖥 HD Wallpaper</button>
+                            <button class="preset-btn" data-w="3840" data-h="2160">✨ 4K</button>
+                            <button class="preset-btn" data-w="2480" data-h="3508">🖨 A4 Print</button>
+                            <button class="preset-btn" data-w="1200" data-h="1200">🪴 Doormat</button>
+                            <button class="preset-btn" data-w="2000" data-h="1500">🧵 Textile</button>
+                            <button class="preset-btn" data-w="800"  data-h="800" >🏠 Floor Tile</button>
+                        </div>
+                    </div>
+                    <div class="custom-dims">
+                        <span class="section-label">Custom Size (px)</span>
+                        <div class="dim-row">
+                            <input type="number" id="design-out-w" value="1920" min="100" max="3840" class="dim-input">
+                            <span class="dim-sep">×</span>
+                            <input type="number" id="design-out-h" value="1080" min="100" max="2160" class="dim-input">
+                        </div>
+                    </div>
+                    <button class="btn primary-btn synthesize-btn" id="synthesize-btn">⚡ Generate Texture</button>
+                </div>
+                <div class="loader-container hidden" id="design-loader">
+                    <div class="spinner"></div>
+                    <p>Generating full-resolution texture...</p>
+                </div>
+            </div>
+
+            <!-- Design Result -->
+            <div class="result-output hidden" id="design-result">
+                <div class="result-card glass-card full-width">
+                    <h3>Synthesized <span class="highlight">Texture</span></h3>
+                    <img id="design-res-img" src="" alt="Synthesized Pattern">
+                    <div class="actions">
+                        <a id="design-download-btn" class="btn primary-btn" download="pattern.png">⬇ Download</a>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /tab-design -->
+
+        <!-- ===== ANALYZE TAB ===== -->
+        <div id="tab-analyze" class="tab-content">
+
             <section class="upload-section glass-card">
                 <form id="upload-form">
                     <div class="drop-zone" id="drop-zone">
                         <span class="drop-icon">⇪</span>
-                        <p>Drag & Drop your texture here</p>
+                        <p>Drag &amp; Drop your texture here</p>
                         <span class="or">or</span>
                         <label for="file-input" class="btn">Browse File</label>
                     </div>
                     <input type="file" id="file-input" accept="image/*" hidden required>
-                    
                     <div class="settings">
                         <div class="input-group">
                             <label>Output Width</label>
@@ -45,7 +181,7 @@
             </section>
 
             <section class="results-section hidden" id="results">
-                <h2>Analysis & <span class="highlight">Reconstruction</span></h2>
+                <h2>Analysis &amp; <span class="highlight">Reconstruction</span></h2>
                 <div class="results-grid">
                     <div class="result-card glass-card">
                         <h3>Original Input</h3>
@@ -60,7 +196,6 @@
                         <img id="res-tile" src="" alt="Extracted Tile">
                     </div>
                 </div>
-                
                 <div class="result-card glass-card full-width">
                     <h3>Final Synthesized Texture</h3>
                     <img id="res-reconstructed" src="" alt="Reconstructed Texture">
@@ -69,8 +204,10 @@
                     </div>
                 </div>
             </section>
-        </main>
-    </div>
+
+        </div><!-- /tab-analyze -->
+
+    </div><!-- /container -->
     <script src="/static/script.js"></script>
 </body>
 </html>
