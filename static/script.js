@@ -69,12 +69,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
 
             if(result.status === 'success') {
+                hideError();
                 displayResults(result.data);
             } else {
-                alert('Error processing image: ' + result.message);
+                showError('⚠️ ' + result.message);
             }
         } catch(error) {
-            alert('An error occurred. Make sure the backend is running.');
+            showError('⚠️ Could not connect to the server. Please try again in a moment.');
             console.error(error);
         } finally {
             loader.classList.add('hidden');
@@ -89,7 +90,27 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('download-btn').href = data.reconstructed;
         
         resultsSection.classList.remove('hidden');
-        // Scroll to results
         resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function showError(msg) {
+        let banner = document.getElementById('error-banner');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'error-banner';
+            banner.style.cssText = `
+                margin-top: 1rem; padding: 1rem 1.5rem; border-radius: 12px;
+                background: rgba(255,80,80,0.15); border: 1px solid rgba(255,80,80,0.4);
+                color: #ff8080; font-size: 0.95rem; text-align: center;
+            `;
+            document.querySelector('.upload-section').appendChild(banner);
+        }
+        banner.textContent = msg;
+        banner.style.display = 'block';
+    }
+
+    function hideError() {
+        const banner = document.getElementById('error-banner');
+        if (banner) banner.style.display = 'none';
     }
 });

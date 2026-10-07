@@ -22,26 +22,27 @@ def detect_lattice(acorr, img_shape, threshold=0.3):
     cy, cx = acorr.shape[0]//2, acorr.shape[1]//2
     min_dist = max(int(min(h, w) * 0.04), 5)
 
-    local_max = (
-        (acorr == maximum_filter(acorr, size=min_dist*2+1)) &
-        (acorr > threshold)
-    )
-    local_max[cy-min_dist:cy+min_dist+1, cx-min_dist:cx+min_dist+1] = False
-
-    ys, xs = np.where(local_max)
-    if len(ys) == 0:
+    peaks = []
+    for thresh in [threshold, 0.15, 0.05]:
         local_max = (
             (acorr == maximum_filter(acorr, size=min_dist*2+1)) &
-            (acorr > 0.15)
+            (acorr > thresh)
         )
         local_max[cy-min_dist:cy+min_dist+1, cx-min_dist:cx+min_dist+1] = False
         ys, xs = np.where(local_max)
+        if len(ys) > 0:
+            ry    = (ys - cy).astype(float)
+            rx    = (xs - cx).astype(float)
+            dists = np.sqrt(rx**2 + ry**2)
+            order = np.argsort(dists)
+            peaks = [(rx[i], ry[i]) for i in order]
+            break
 
-    ry    = (ys - cy).astype(float)
-    rx    = (xs - cx).astype(float)
-    dists = np.sqrt(rx**2 + ry**2)
-    order = np.argsort(dists)
-    peaks = [(rx[i], ry[i]) for i in order]
+    if len(peaks) == 0:
+        raise ValueError(
+            "No repeating pattern detected in this image. "
+            "Please try a texture or tile image with a clear geometric pattern."
+        )
 
     v1 = np.array(peaks[0])
     v2 = None
