@@ -54,13 +54,27 @@ def detect_lattice(acorr, img_shape, threshold=0.3):
             break
 
     if v2 is None:
-        raise ValueError("Could not find two independent lattice vectors.")
+        raise ValueError(
+            "Could not find two independent lattice vectors. "
+            "The image may not have a clear repeating geometric pattern."
+        )
+
+    # Sanity check: tile vectors must be large enough to be a real repeating unit.
+    # If both vectors are tiny (<5% of the image), the image is likely organic/random.
+    min_dim = min(img_shape)
+    mag1, mag2 = np.linalg.norm(v1), np.linalg.norm(v2)
+    if mag1 < min_dim * 0.05 or mag2 < min_dim * 0.05:
+        raise ValueError(
+            "The detected pattern tile is too small — this image likely doesn't have "
+            "a clear geometric repeating structure. "
+            "Please use a seamless tile or wallpaper-style texture."
+        )
 
     ang1 = np.degrees(np.arctan2(v1[1], v1[0]))
     ang2 = np.degrees(np.arctan2(v2[1], v2[0]))
     kind = "axis-aligned" if (abs(ang1) < 5 or abs(ang2) < 5) else "diagonal/rotated"
-    print(f"v1 = ({v1[0]:+.1f}, {v1[1]:+.1f})  mag={np.linalg.norm(v1):.1f}px  angle={ang1:.1f}°")
-    print(f"v2 = ({v2[0]:+.1f}, {v2[1]:+.1f})  mag={np.linalg.norm(v2):.1f}px  angle={ang2:.1f}°")
+    print(f"v1 = ({v1[0]:+.1f}, {v1[1]:+.1f})  mag={mag1:.1f}px  angle={ang1:.1f}°")
+    print(f"v2 = ({v2[0]:+.1f}, {v2[1]:+.1f})  mag={mag2:.1f}px  angle={ang2:.1f}°")
     print(f"Pattern type: {kind}")
     return v1, v2
 
