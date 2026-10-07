@@ -13,16 +13,20 @@ document.addEventListener('DOMContentLoaded', () => {
     let startY = 0;
     let snapshot;
     let history = [];
+    let showGrid = true; // Live preview grid default
 
     // UI Elements
-    const toolBtns = document.querySelectorAll('.tool-btn');
+    const toolBtns = document.querySelectorAll('.tool-btn[data-tool]');
     const fillColor = document.getElementById('fill-color');
+    const fillHex = document.getElementById('fill-hex');
     const strokeColor = document.getElementById('stroke-color');
+    const strokeHex = document.getElementById('stroke-hex');
     const strokeWidth = document.getElementById('stroke-width');
     const strokeWidthVal = document.getElementById('stroke-width-val');
     const filledToggle = document.getElementById('filled-toggle');
     const bgColor = document.getElementById('bg-color');
-    const gridToggle = document.getElementById('grid-toggle');
+    const bgHex = document.getElementById('bg-hex');
+    const gridToggleBtn = document.getElementById('grid-toggle-btn');
     const undoBtn = document.getElementById('undo-btn');
     const clearBtn = document.getElementById('clear-btn');
 
@@ -43,18 +47,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    strokeWidth.addEventListener('input', (e) => {
-        strokeWidthVal.textContent = e.target.value;
-    });
+    // Sync sliders and hex values
+    strokeWidth.addEventListener('input', (e) => { strokeWidthVal.value = e.target.value; });
+    strokeWidthVal.addEventListener('input', (e) => { strokeWidth.value = e.target.value; });
 
-    bgColor.addEventListener('input', () => {
-        const temp = ctx.getImageData(0,0, canvas.width, canvas.height);
+    fillColor.addEventListener('input', (e) => { fillHex.textContent = e.target.value.toUpperCase(); });
+    strokeColor.addEventListener('input', (e) => { strokeHex.textContent = e.target.value.toUpperCase(); });
+
+    bgColor.addEventListener('input', (e) => {
+        bgHex.textContent = e.target.value.toUpperCase();
+        // Redraw canvas with new background
         ctx.fillStyle = bgColor.value;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         redrawHistory();
     });
 
-    gridToggle.addEventListener('change', updatePreview);
+    gridToggleBtn.addEventListener('click', () => {
+        showGrid = !showGrid;
+        gridToggleBtn.style.opacity = showGrid ? '1' : '0.5';
+        updatePreview();
+    });
 
     // Drawing functions
     function saveHistory() {
@@ -87,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initCanvas();
     });
 
-    // Drawing events - using getBoundingClientRect to map mouse correctly if scaled
+    // Drawing events - precise mouse mapping
     function getMousePos(evt) {
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
@@ -203,8 +215,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        if (gridToggle.checked) {
-            previewCtx.strokeStyle = 'rgba(102, 252, 241, 0.5)';
+        if (showGrid) {
+            previewCtx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
             previewCtx.lineWidth = 1;
             previewCtx.beginPath();
             for (let i = 1; i < 3; i++) {
@@ -217,8 +229,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initCanvas();
 
-    // Presets
-    const presetBtns = document.querySelectorAll('.preset-btn');
+    // Export Presets
+    const presetBtns = document.querySelectorAll('.export-preset');
     const outWInput = document.getElementById('design-out-w');
     const outHInput = document.getElementById('design-out-h');
 
@@ -237,17 +249,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Modals
+    // Modals & Synthesis
     const analyzeModal = document.getElementById('analyze-modal');
     const resultModal = document.getElementById('result-modal');
-    const btnOpenAnalyze = document.getElementById('btn-open-analyze');
     
+    document.getElementById('btn-open-analyze').addEventListener('click', () => analyzeModal.classList.remove('hidden'));
     document.getElementById('close-analyze-modal').addEventListener('click', () => analyzeModal.classList.add('hidden'));
     document.getElementById('close-result-modal').addEventListener('click', () => resultModal.classList.add('hidden'));
-    btnOpenAnalyze.addEventListener('click', () => analyzeModal.classList.remove('hidden'));
 
-    // Synthesize Design
-    const synthesizeBtn = document.getElementById('synthesize-btn');
+    const synthesizeBtn = document.getElementById('header-synthesize-btn');
     const designLoader = document.getElementById('design-loader');
     const designResult = document.getElementById('design-result');
 
@@ -297,52 +307,26 @@ document.addEventListener('DOMContentLoaded', () => {
     if (dropZone) {
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropZone.addEventListener(eventName, e => {
-                e.preventDefault();
-                e.stopPropagation();
+                e.preventDefault(); e.stopPropagation();
             }, false);
         });
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
-        });
-
         dropZone.addEventListener('drop', (e) => {
             let files = e.dataTransfer.files;
-            if(files.length > 0) {
-                fileInput.files = files;
-                showPreviewAnalysis(files[0]);
-            }
+            if(files.length > 0) { fileInput.files = files; updateDropZoneText(files[0].name); }
         });
-
         fileInput.addEventListener('change', (e) => {
-            if(e.target.files.length > 0) showPreviewAnalysis(e.target.files[0]);
+            if(e.target.files.length > 0) updateDropZoneText(e.target.files[0].name);
         });
     }
 
-    function showPreviewAnalysis(file) {
-        const existing = dropZone.querySelector('#drop-preview');
-        if (existing && existing.dataset.url) URL.revokeObjectURL(existing.dataset.url);
-
-        const objectUrl = URL.createObjectURL(file);
-        dropZone.innerHTML = `
-            <img id="drop-preview" src="${objectUrl}" data-url="${objectUrl}"
-                 alt="Preview" style="max-width: 100%; max-height: 220px; border-radius: 10px; object-fit: contain; box-shadow: 0 4px 20px rgba(0,0,0,0.5); margin-bottom: 0.75rem;">
-            <p style="color: var(--primary); font-size: 0.95rem; margin-bottom: 0.5rem;">${file.name}</p>
-            <label for="file-input" class="btn" style="font-size:0.85rem; padding: 0.5rem 1.2rem;">Change Image</label>
-        `;
+    function updateDropZoneText(name) {
+        dropZone.innerHTML = `<p style="color:var(--primary)">Selected: ${name}</p>`;
     }
 
     if (form) {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if(fileInput.files.length === 0) {
-                alert('Please select an image file first.');
-                return;
-            }
+            if(fileInput.files.length === 0) { alert('Please select an image file first.'); return; }
 
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
@@ -357,27 +341,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await response.json();
 
                 if(result.status === 'success') {
-                    displayResultsAnalysis(result.data);
+                    document.getElementById('res-original').src = result.data.original;
+                    document.getElementById('res-autocorr').src = result.data.autocorr;
+                    document.getElementById('res-tile').src = result.data.tile;
+                    document.getElementById('res-reconstructed').src = result.data.reconstructed;
+                    document.getElementById('download-btn').href = result.data.reconstructed;
+                    resultsSection.classList.remove('hidden');
                 } else {
                     alert('Error: ' + result.message);
                 }
             } catch(error) {
-                alert('Could not connect to the server. Please try again in a moment.');
-                console.error(error);
+                alert('Could not connect to the server.');
             } finally {
                 loader.classList.add('hidden');
             }
         });
-    }
-
-    function displayResultsAnalysis(data) {
-        document.getElementById('res-original').src = data.original;
-        document.getElementById('res-autocorr').src = data.autocorr;
-        document.getElementById('res-tile').src = data.tile;
-        document.getElementById('res-reconstructed').src = data.reconstructed;
-        document.getElementById('download-btn').href = data.reconstructed;
-        
-        resultsSection.classList.remove('hidden');
-        resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 });

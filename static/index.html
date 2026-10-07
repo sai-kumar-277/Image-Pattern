@@ -3,208 +3,242 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Textile & Pattern Studio</title>
+    <title>Textile Studio Pro</title>
     <link rel="stylesheet" href="/static/styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
-<body class="studio-body">
+<body class="pro-theme">
 
-    <!-- Top Navigation -->
-    <nav class="top-nav">
-        <div class="brand">
-            <h1>Textile <span class="highlight">Studio</span></h1>
+    <!-- Top App Bar -->
+    <header class="app-header">
+        <div class="header-left">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 22h20L12 2z"/></svg>
+            <span class="app-title">TextileStudio</span>
+            <span class="divider">/</span>
+            <span class="doc-title">Untitled Pattern</span>
         </div>
-        <div class="nav-actions">
-            <button id="btn-open-analyze" class="btn text-btn">🔍 Auto-Analyze Image Instead</button>
+        <div class="header-right">
+            <button id="btn-open-analyze" class="btn btn-secondary">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                Legacy Analyzer
+            </button>
+            <button class="btn btn-primary" id="header-synthesize-btn">
+                Export Fabric
+            </button>
         </div>
-    </nav>
+    </header>
 
     <!-- Main Workspace -->
     <div class="workspace">
         
-        <!-- Left Sidebar: Drawing Tools -->
-        <aside class="sidebar left-sidebar">
-            <div class="tool-section">
-                <span class="section-label">Art Tools</span>
-                <div class="tool-grid">
-                    <button class="tool-btn active" data-tool="rect"     title="Rectangle">▭</button>
-                    <button class="tool-btn"        data-tool="circle"   title="Circle / Ellipse">○</button>
-                    <button class="tool-btn"        data-tool="triangle" title="Triangle">△</button>
-                    <button class="tool-btn"        data-tool="diamond"  title="Diamond">◇</button>
-                    <button class="tool-btn"        data-tool="hexagon"  title="Hexagon">⬡</button>
-                    <button class="tool-btn"        data-tool="star"     title="5-Point Star">★</button>
-                    <button class="tool-btn"        data-tool="line"     title="Line">╱</button>
-                </div>
+        <!-- Left Toolbar (Slim) -->
+        <aside class="toolbar">
+            <div class="tool-group">
+                <button class="tool-btn active" data-tool="rect" title="Rectangle (R)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                </button>
+                <button class="tool-btn" data-tool="circle" title="Ellipse (O)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>
+                </button>
+                <button class="tool-btn" data-tool="triangle" title="Triangle">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12,3 21,21 3,21"/></svg>
+                </button>
+                <button class="tool-btn" data-tool="diamond" title="Diamond">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12,2 22,12 12,22 2,12"/></svg>
+                </button>
+                <button class="tool-btn" data-tool="hexagon" title="Hexagon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12,2 21,7 21,17 12,22 3,17 3,7"/></svg>
+                </button>
+                <button class="tool-btn" data-tool="star" title="Star">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+                </button>
+                <button class="tool-btn" data-tool="line" title="Line (L)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="20" x2="20" y2="4"/></svg>
+                </button>
             </div>
-
-            <div class="tool-section">
-                <span class="section-label">Colors & Style</span>
-                <div class="prop-row">
-                    <label class="color-label">Fill Color
-                        <input type="color" id="fill-color" value="#66fcf1">
-                    </label>
-                    <label class="color-label">Line Color
-                        <input type="color" id="stroke-color" value="#0b0c10">
-                    </label>
-                </div>
-                <div class="prop-row">
-                    <label class="toggle-label">
-                        <input type="checkbox" id="filled-toggle" checked>
-                        Fill Shape Solid
-                    </label>
-                </div>
-                <div class="prop-row">
-                    <span class="prop-name">Line Thickness</span>
-                    <input type="range" id="stroke-width" min="0" max="20" value="2" class="slider">
-                    <span id="stroke-width-val" class="val-badge">2</span>
-                </div>
-            </div>
-
-            <div class="tool-section">
-                <span class="section-label">Base Canvas</span>
-                <div class="prop-row">
-                    <label class="color-label">Background Color
-                        <input type="color" id="bg-color" value="#1f2833">
-                    </label>
-                </div>
-                <div class="prop-row">
-                    <label class="toggle-label">
-                        <input type="checkbox" id="grid-toggle">
-                        Show Alignment Grid
-                    </label>
-                </div>
-            </div>
-
-            <div class="tool-section mt-auto">
-                <button class="tool-action-btn" id="undo-btn">↩ Undo Last Shape</button>
-                <button class="tool-action-btn" id="clear-btn">🗑 Clear Canvas</button>
+            
+            <div class="tool-group mt-auto">
+                <button class="tool-btn" id="undo-btn" title="Undo (Ctrl+Z)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+                </button>
+                <button class="tool-btn text-danger" id="clear-btn" title="Clear Canvas">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
             </div>
         </aside>
 
-        <!-- Center: Big Art Canvas -->
-        <main class="canvas-container">
-            <div class="canvas-shadow-wrapper">
+        <!-- Center Canvas Area -->
+        <main class="canvas-area">
+            <div class="canvas-board">
                 <canvas id="design-canvas" width="600" height="600"></canvas>
-            </div>
-            <div class="canvas-help">
-                <p>You are designing a single repeating block (motif). Size: 600x600</p>
             </div>
         </main>
 
-        <!-- Right Sidebar: Synthesis & Export -->
-        <aside class="sidebar right-sidebar">
-            <div class="tool-section">
-                <span class="section-label">Fabric Preview (How it tiles)</span>
-                <div class="preview-box">
+        <!-- Right Properties Panel -->
+        <aside class="properties-panel">
+            
+            <div class="panel-section">
+                <div class="section-header">Live Tile Preview</div>
+                <div class="preview-container">
                     <canvas id="preview-canvas" width="240" height="240"></canvas>
+                    <button class="icon-btn overlay-btn" id="grid-toggle-btn" title="Toggle Grid">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 12h18"/><path d="M12 3v18"/></svg>
+                    </button>
                 </div>
-                <p class="preview-hint">This mini-view shows how your design connects when stamped across a large fabric.</p>
             </div>
 
-            <div class="tool-section mt-auto">
-                <span class="section-label">Synthesize Final Fabric</span>
-                <p class="preview-hint" style="margin-bottom:1rem; text-align:left;">Choose the final dimensions for your Saree or Jersey pattern.</p>
+            <div class="panel-section">
+                <div class="section-header">Appearance</div>
                 
-                <div class="presets-vertical">
-                    <button class="preset-btn active" data-w="2000" data-h="2000">👕 Jersey Base (2000x2000)</button>
-                    <button class="preset-btn" data-w="1200" data-h="3600">🥻 Saree Body Print</button>
-                    <button class="preset-btn" data-w="3840" data-h="2160">✨ 4K Digital Wallpaper</button>
-                    <button class="preset-btn" data-w="2480" data-h="3508">🖨 A4 Print Roll</button>
+                <div class="prop-row">
+                    <span class="prop-label">Fill</span>
+                    <div class="color-picker-wrap">
+                        <input type="color" id="fill-color" value="#000000">
+                        <span class="color-hex" id="fill-hex">#000000</span>
+                    </div>
+                    <label class="checkbox-wrap" title="Enable Fill">
+                        <input type="checkbox" id="filled-toggle" checked>
+                        <span class="checkmark"></span>
+                    </label>
                 </div>
-
-                <div class="custom-dims-vertical">
-                    <span class="prop-name">Custom Size (px)</span>
-                    <div class="dim-row">
-                        <input type="number" id="design-out-w" value="2000" min="100" max="4000" class="dim-input">
-                        <span class="dim-sep">×</span>
-                        <input type="number" id="design-out-h" value="2000" min="100" max="4000" class="dim-input">
+                
+                <div class="prop-row">
+                    <span class="prop-label">Stroke</span>
+                    <div class="color-picker-wrap">
+                        <input type="color" id="stroke-color" value="#333333">
+                        <span class="color-hex" id="stroke-hex">#333333</span>
                     </div>
                 </div>
-                
-                <button class="btn primary-btn synthesize-btn" id="synthesize-btn" style="width: 100%; margin-top: 1rem;">⚡ Generate Fabric File</button>
+
+                <div class="prop-row">
+                    <span class="prop-label">Weight</span>
+                    <div class="slider-wrap">
+                        <input type="range" id="stroke-width" min="0" max="20" value="2">
+                        <input type="number" id="stroke-width-val" value="2" min="0" max="20">
+                    </div>
+                </div>
             </div>
+
+            <div class="panel-section">
+                <div class="section-header">Canvas</div>
+                <div class="prop-row">
+                    <span class="prop-label">Background</span>
+                    <div class="color-picker-wrap">
+                        <input type="color" id="bg-color" value="#ffffff">
+                        <span class="color-hex" id="bg-hex">#FFFFFF</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section mt-auto border-top">
+                <div class="section-header">Export Configuration</div>
+                
+                <div class="export-grid">
+                    <button class="export-preset active" data-w="2000" data-h="2000">
+                        <span class="preset-name">Jersey Base</span>
+                        <span class="preset-dim">2000 × 2000</span>
+                    </button>
+                    <button class="export-preset" data-w="1200" data-h="3600">
+                        <span class="preset-name">Saree Roll</span>
+                        <span class="preset-dim">1200 × 3600</span>
+                    </button>
+                    <button class="export-preset" data-w="3840" data-h="2160">
+                        <span class="preset-name">4K Screen</span>
+                        <span class="preset-dim">3840 × 2160</span>
+                    </button>
+                </div>
+
+                <div class="custom-dims">
+                    <div class="dim-input-group">
+                        <label>W</label>
+                        <input type="number" id="design-out-w" value="2000">
+                    </div>
+                    <div class="dim-link">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                    </div>
+                    <div class="dim-input-group">
+                        <label>H</label>
+                        <input type="number" id="design-out-h" value="2000">
+                    </div>
+                </div>
+            </div>
+
         </aside>
     </div>
 
-    <!-- Modals -->
-
-    <!-- Synthesized Output Modal -->
+    <!-- Export Modal -->
     <div id="result-modal" class="modal hidden">
-        <div class="modal-content glass-card large-modal">
-            <span class="close-modal" id="close-result-modal">&times;</span>
-            <h2>Final Fabric <span class="highlight">Pattern</span></h2>
-            <div class="loader-container hidden" id="design-loader">
-                <div class="spinner"></div>
-                <p>Generating full-resolution texture...</p>
+        <div class="modal-content result-modal-content">
+            <div class="modal-header">
+                <h3>Exported Fabric</h3>
+                <button class="icon-btn" id="close-result-modal">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
             </div>
-            <div id="design-result" class="hidden">
-                <div class="img-wrapper-scroll">
-                    <img id="design-res-img" src="" alt="Synthesized Pattern">
+            
+            <div class="modal-body">
+                <div class="loader-state" id="design-loader">
+                    <div class="spinner"></div>
+                    <p>Rendering high-resolution texture...</p>
                 </div>
-                <div class="actions" style="margin-top:1.5rem; text-align:center;">
-                    <a id="design-download-btn" class="btn primary-btn" download="fabric_pattern.png">⬇ Download High-Res Image</a>
+                
+                <div id="design-result" class="hidden">
+                    <div class="export-preview">
+                        <img id="design-res-img" src="" alt="Synthesized Pattern">
+                    </div>
+                    <div class="export-actions">
+                        <a id="design-download-btn" class="btn btn-primary w-full" download="fabric_pattern.png">Download HD Texture</a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Legacy Analysis Modal -->
+    <!-- Legacy Analyzer Modal -->
     <div id="analyze-modal" class="modal hidden">
-        <div class="modal-content glass-card large-modal">
-            <span class="close-modal" id="close-analyze-modal">&times;</span>
-            <h2>Auto-Analyze <span class="highlight">Uploaded Pattern</span></h2>
-            <p style="color:var(--text-muted); margin-bottom:1.5rem;">Upload an existing geometric pattern image to detect its lattice and tile it.</p>
-            
-            <section class="upload-section">
+        <div class="modal-content result-modal-content">
+            <div class="modal-header">
+                <h3>Legacy Analyzer</h3>
+                <button class="icon-btn" id="close-analyze-modal">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
                 <form id="upload-form">
                     <div class="drop-zone" id="drop-zone">
-                        <span class="drop-icon">⇪</span>
-                        <p>Drag &amp; Drop your texture here</p>
-                        <span class="or">or</span>
-                        <label for="file-input" class="btn">Browse File</label>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <p>Drag image or <label for="file-input" class="text-link">browse</label></p>
                     </div>
                     <input type="file" id="file-input" accept="image/*" hidden>
-                    <div class="settings" style="justify-content:center;">
-                        <div class="input-group">
-                            <label>Output Width</label>
+                    
+                    <div class="custom-dims mt-4">
+                        <div class="dim-input-group">
+                            <label>W</label>
                             <input type="number" id="out-w" value="1920">
                         </div>
-                        <div class="input-group">
-                            <label>Output Height</label>
+                        <div class="dim-input-group">
+                            <label>H</label>
                             <input type="number" id="out-h" value="1080">
                         </div>
-                        <button type="submit" class="btn primary-btn" id="generate-btn">Synthesize Texture</button>
                     </div>
+                    <button type="submit" class="btn btn-primary w-full mt-4" id="generate-btn">Synthesize Output</button>
                 </form>
-                <div class="loader-container hidden" id="loader">
-                    <div class="spinner"></div>
-                    <p>Analyzing lattice vectors...</p>
-                </div>
-            </section>
 
-            <section class="results-section hidden" id="results" style="margin-top:2rem;">
-                <div class="results-grid" style="grid-template-columns: 1fr 1fr 1fr;">
-                    <div class="result-card">
-                        <h3 style="font-size:1rem; margin-bottom:0.5rem;">Original</h3>
-                        <img id="res-original" src="" alt="Original Image">
-                    </div>
-                    <div class="result-card">
-                        <h3 style="font-size:1rem; margin-bottom:0.5rem;">Autocorrelation</h3>
-                        <img id="res-autocorr" src="" alt="Autocorrelation">
-                    </div>
-                    <div class="result-card">
-                        <h3 style="font-size:1rem; margin-bottom:0.5rem;">Extracted Tile</h3>
-                        <img id="res-tile" src="" alt="Extracted Tile">
-                    </div>
+                <div class="loader-state hidden" id="loader">
+                    <div class="spinner"></div>
+                    <p>Detecting lattice...</p>
                 </div>
-                <div class="result-card full-width" style="margin-top:1.5rem;">
-                    <h3>Final Synthesized Texture</h3>
-                    <img id="res-reconstructed" src="" alt="Reconstructed Texture">
-                    <div class="actions" style="margin-top:1rem;">
-                        <a id="download-btn" class="btn primary-btn" download="synthesized_texture.png">Download HD Texture</a>
+
+                <div class="analyzer-results hidden" id="results">
+                    <div class="mini-results">
+                        <img id="res-original" src="" title="Original">
+                        <img id="res-autocorr" src="" title="Autocorrelation">
+                        <img id="res-tile" src="" title="Extracted Tile">
                     </div>
+                    <img id="res-reconstructed" src="" class="main-result" title="Final Texture">
+                    <a id="download-btn" class="btn btn-primary w-full mt-4" download="synthesized_texture.png">Download HD</a>
                 </div>
-            </section>
+            </div>
         </div>
     </div>
 
